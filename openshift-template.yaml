@@ -28,18 +28,16 @@ items:
       runPolicy: Serial
       source:
         dockerfile: |-
-          FROM adoptopenjdk/openjdk11:alpine-slim as builder
+          FROM golang:alpine AS build-env
+          RUN apk --no-cache add build-base git bzr mercurial gcc
+          ADD . /src
+          RUN cd /src && go build -o go-simple-service
 
+          # final stage
+          FROM alpine
           WORKDIR /app
-          COPY . .
-          RUN ./mvnw clean package -DskipTests -P openshift
-
-          FROM adoptopenjdk/openjdk11:alpine-jre
-          RUN apk add --no-cache curl
-          RUN curl -fsSLk https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/local/bin/jq
-          RUN chmod a+x /usr/local/bin/jq
-          COPY --from=builder /app/target/application.jar /
-          ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/application.jar"]
+          COPY --from=build-env /src/go-simple-service /app/
+          ENTRYPOINT ./go-simple-service
         git:
           ref: master
           uri: https://github.com/in-the-keyhole/go-simple-service.git
@@ -85,17 +83,6 @@ items:
             pipeline {
               agent { node { label 'maven' } }
               stages {
-                stage('Fetch Source') {
-                  steps {
-                    git url: 'https://github.com/in-the-keyhole/go-simple-service.git', branch: 'master'
-                  }
-                }
-                
-                stage('Unit Testing') {
-                  steps {
-                    sh("./mvnw clean test")
-                  }
-                }
 
                 stage('Build Image') {
                   steps {
