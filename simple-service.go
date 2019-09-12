@@ -13,5 +13,5 @@ func main() {
 // HelloServer - say Hello to name parameter
 func HelloServer(w http.ResponseWriter, r *http.Request) {
 	queryValues := r.URL.Query()
-	fmt.Fprintf(w, "Hello, %s!", queryValues.Get("name"))
+	fmt.Fprintf(w, "Hello, %s from Go", queryValues.Get("name"))
 }
