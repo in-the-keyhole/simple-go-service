@@ -1,6 +1,6 @@
 ---
 applications:
-  - name: go-simple-service
+  - name: simple-go-service
     buildpack: go_buildpack
     memory: 256M
     env:
