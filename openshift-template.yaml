@@ -1,5 +1,6 @@
 apiVersion: v1
 items:
+  # IMAGE STREAM
   - apiVersion: image.openshift.io/v1
     kind: ImageStream
     metadata:
@@ -10,6 +11,7 @@ items:
     spec:
       lookupPolicy:
         local: false
+  # BUILD CONFIG
   - apiVersion: build.openshift.io/v1
     kind: BuildConfig
     metadata:
@@ -48,6 +50,7 @@ items:
         type: Docker
       successfulBuildsHistoryLimit: 5
       triggers: []
+  # PIPELINE
   - apiVersion: v1
     kind: BuildConfig
     metadata:
@@ -118,6 +121,7 @@ items:
             secretReference:
               name: github
           type: GitHub
+  # DEPLOYMENT CONFIG
   - apiVersion: apps.openshift.io/v1
     kind: DeploymentConfig
     metadata:
@@ -155,6 +159,16 @@ items:
               ports:
                 - containerPort: 8080
                   protocol: TCP
+              readinessProbe:
+                tcpSocket:
+                  port: 8080
+                initialDelaySeconds: 5
+                periodSeconds: 10
+              livenessProbe:
+                tcpSocket:
+                  port: 8080
+                initialDelaySeconds: 15
+                periodSeconds: 20
               resources: {}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
@@ -172,6 +186,7 @@ items:
               kind: ImageStreamTag
               name: simple-go-service:latest
           type: ImageChange
+  # SERVICE
   - apiVersion: v1
     kind: Service
     metadata:
@@ -188,6 +203,7 @@ items:
         deploymentconfig: simple-go-service
       sessionAffinity: None
       type: ClusterIP
+  # ROUTE
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
