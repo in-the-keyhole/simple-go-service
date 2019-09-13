@@ -1,7 +1,6 @@
 FROM golang:alpine AS build-env
 RUN apk --no-cache add build-base git bzr mercurial gcc
 ADD . /src
-RUN go get github.com/sirupsen/logrus
 RUN cd /src && go build -o simple-go-service
 
 # final stage
